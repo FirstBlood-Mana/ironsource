@@ -3,10 +3,19 @@ package com.zfinix.ironsource;
 import android.app.Activity;
 import android.content.Context;
 import java.util.HashMap;
+
+import io.flutter.Log;
 import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.StandardMessageCodec;
 import io.flutter.plugin.platform.PlatformView;
 import io.flutter.plugin.platform.PlatformViewFactory;
+import android.content.Context;
+import io.flutter.plugin.common.BinaryMessenger;
+import io.flutter.plugin.common.StandardMessageCodec;
+import io.flutter.plugin.platform.PlatformView;
+import io.flutter.plugin.platform.PlatformViewFactory;
+import java.util.Map;
+
 
 
 public class IronSourceBanner extends PlatformViewFactory {
@@ -22,6 +31,7 @@ public class IronSourceBanner extends PlatformViewFactory {
 
     @Override
     public PlatformView create(Context context, int id, Object args) {
+        Log.d("id", String.valueOf(id));
         return new IronSourceBannerView(context, id, (HashMap) args, this.messenger, this.mActivity);
     }
 

@@ -27,9 +27,6 @@ import io.flutter.plugin.common.PluginRegistry.Registrar;
 public class IronSourcePlugin {
 
     public final String TAG = "IronSourcePlugin";
-    public String APP_KEY = "85460dcd";
-    public Placement mPlacement;
-    public final String FALLBACK_USER_ID = "userId";
     public static MethodCallHandlerImpl handler  = null;
 
 
@@ -41,7 +38,6 @@ public class IronSourcePlugin {
         handler = new MethodCallHandlerImpl(registrar.activity(), channel);
         channel.setMethodCallHandler(handler);
 
-        final MethodChannel interstitialAdChannel = new MethodChannel(registrar.messenger(), IronSourceConsts.INTERSTITIAL_CHANNEL);
         registrar.platformViewRegistry().registerViewFactory(IronSourceConsts.BANNER_AD_CHANNEL, new IronSourceBanner(registrar.activity(), registrar.messenger()));
     }
 

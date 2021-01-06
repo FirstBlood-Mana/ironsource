@@ -95,7 +95,6 @@ public class MethodCallHandlerImpl implements MethodCallHandler , InterstitialLi
         IronSource.setOfferwallListener(this);
         SupersonicConfig.getConfigObj().setClientSideCallbacks(true);
         IronSource.init(mActivity, appKey);
-
     }
 
 

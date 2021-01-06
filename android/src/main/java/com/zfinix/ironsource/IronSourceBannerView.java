@@ -1,20 +1,12 @@
 package com.zfinix.ironsource;
 
-import io.flutter.plugin.common.BinaryMessenger;
-import io.flutter.plugin.common.MethodChannel;
-import io.flutter.plugin.platform.PlatformView;
-
 import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 
-import java.util.HashMap;
-import java.util.Map;
+import androidx.annotation.NonNull;
 
 import com.ironsource.mediationsdk.ISBannerSize;
 import com.ironsource.mediationsdk.IronSource;
@@ -22,15 +14,26 @@ import com.ironsource.mediationsdk.IronSourceBannerLayout;
 import com.ironsource.mediationsdk.logger.IronSourceError;
 import com.ironsource.mediationsdk.sdk.BannerListener;
 
-public class IronSourceBannerView implements PlatformView, BannerListener {
-    private FrameLayout adView;
+import java.util.HashMap;
+import java.util.Map;
+
+import io.flutter.embedding.engine.plugins.activity.ActivityAware;
+import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
+import io.flutter.plugin.common.BinaryMessenger;
+import io.flutter.plugin.common.MethodChannel;
+import io.flutter.plugin.platform.PlatformView;
+
+public class IronSourceBannerView implements PlatformView, BannerListener, ActivityAware {
+    private FrameLayout rootView;
     private final String TAG = "IronSourceBannerView";
     private final MethodChannel channel;
     private final HashMap args;
-    private final Context context;
+    private Context context;
     private Activity activity;
 
-    private IronSourceBannerLayout mIronSourceBannerLayout;
+    private IronSourceBannerLayout bannerLayout;
+
+    private boolean initialized;
 
 
     IronSourceBannerView(Context context, int id, HashMap args, BinaryMessenger messenger, Activity activity) {
@@ -39,47 +42,85 @@ public class IronSourceBannerView implements PlatformView, BannerListener {
         this.activity = activity;
         this.args = args;
         this.context = context;
-        adView = new FrameLayout(context);
-        // choose banner size
-        ISBannerSize size = ISBannerSize.BANNER;
-        final int height = (int) args.get("height");
-        final int width = (int) args.get("height");
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(width, height);
-        // instantiate IronSourceBanner object, using the IronSource.createBanner API
-        mIronSourceBannerLayout = IronSource.createBanner(activity, size);
-        mIronSourceBannerLayout.setBannerListener(this);
+
         loadBanner();
-    }
-
-
-    private void loadBanner() {
-        if (adView.getChildCount() > 0)
-            adView.removeAllViews();
-        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT,
-                FrameLayout.LayoutParams.MATCH_PARENT);
-        adView.addView(
-                mIronSourceBannerLayout,0,layoutParams
-        );
-        adView.setVisibility(View.VISIBLE);
-
-        IronSource.loadBanner(mIronSourceBannerLayout);
 
     }
 
+    public void loadBanner() {
+
+        if (!initialized) {
+            initialized = true;
+        }
+        if (activity == null) {
+            Log.e("E_LOAD_ACTIVITY", "Found no activity");
+            //channel.invokeMethod("E_LOAD_ACTIVITY", "Found no activity");
+            return;
+        }
+        activity.runOnUiThread(new Runnable() {
+
+            @Override
+            public void run() {
+                ISBannerSize size = ISBannerSize.BANNER;
+                rootView = new FrameLayout(context);
+                IronSource.destroyBanner(bannerLayout);
+                bannerLayout = IronSource.createBanner(activity, size);
+                bannerLayout.setBannerListener(IronSourceBannerView.this);
+                IronSource.loadBanner(bannerLayout);
+
+                if (rootView.getChildCount() > 0)
+                    rootView.removeAllViews();
+
+                    final FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(
+                            FrameLayout.LayoutParams.MATCH_PARENT,
+                            FrameLayout.LayoutParams.WRAP_CONTENT
+                    );
+                    bannerLayout.setVisibility(View.VISIBLE);
+                    rootView.addView(bannerLayout, 0, layoutParams);
+
+                Log.d("E_LOAD_ACTIVITY", "Loaded activity");
+            }
+        });
+    }
 
 
-
-
+    @Override
     public View getView() {
-        return adView;
+        return rootView;
     }
 
     @Override
     public void dispose() {
-        adView.setVisibility(View.INVISIBLE);
-        mIronSourceBannerLayout.removeBannerListener();
-        IronSource.destroyBanner(mIronSourceBannerLayout);
-        channel.setMethodCallHandler(null);
+        IronSource.destroyBanner(bannerLayout);
+    }
+
+    public void destroyBanner() {
+        if (bannerLayout != null) {
+                IronSource.destroyBanner(bannerLayout);
+        }
+    }
+
+    public void showBanner() {
+        if (bannerLayout != null) {
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    bannerLayout.setVisibility(View.VISIBLE);
+                }
+            });
+        }
+    }
+
+
+    public void hideBanner() {
+        if (bannerLayout != null) {
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    bannerLayout.setVisibility(View.INVISIBLE);
+                }
+            });
+        }
     }
 
     @Override
@@ -95,9 +136,12 @@ public class IronSourceBannerView implements PlatformView, BannerListener {
 
     @Override
     public void onBannerAdLoadFailed(final IronSourceError ironSourceError) {
+
         activity.runOnUiThread(
                 new Runnable() {
                     public void run() {
+                        bannerLayout.removeAllViews();
+
                         Map<String, Object> arguments = new HashMap<String, Object>();
                         arguments.put("errorCode", ironSourceError.getErrorCode());
                         arguments.put("errorMessage", ironSourceError.getErrorMessage());
@@ -156,4 +200,31 @@ public class IronSourceBannerView implements PlatformView, BannerListener {
     }
 
 
+    @Override
+    public void onAttachedToActivity(@NonNull ActivityPluginBinding binding) {
+        activity = binding.getActivity();
+        context = activity.getApplicationContext();
+        IronSource.onResume(activity);
+    }
+
+    @Override
+    public void onDetachedFromActivityForConfigChanges() {
+        IronSource.onPause(activity);
+    }
+
+    @Override
+    public void onReattachedToActivityForConfigChanges(@NonNull ActivityPluginBinding binding) {
+        onAttachedToActivity(binding);
+        activity = binding.getActivity();
+        context = activity.getApplicationContext();
+        IronSource.onResume(activity);
+        showBanner();
+    }
+
+    @Override
+    public void onDetachedFromActivity() {
+        IronSource.onPause(activity);
+        onDetachedFromActivity();
+        hideBanner();
+    }
 }

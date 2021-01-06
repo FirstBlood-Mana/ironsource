@@ -20,7 +20,7 @@ class IronSourceBannerAd extends StatefulWidget {
   final Key key;
   final IronSourceBannerListener listener;
   final bool keepAlive;
-  IronSourceBannerAd({
+  const IronSourceBannerAd({
     this.key,
     this.listener,
     this.keepAlive = false,
@@ -43,7 +43,7 @@ class _IronSourceBannerAdState extends State<IronSourceBannerAd>
   Widget build(BuildContext context) {
     super.build(context);
     if (defaultTargetPlatform == TargetPlatform.android) {
-      return Container(
+      return  Container(
           width: size.width.toDouble(),
           height: size.height.toDouble(),
           child: AndroidView(
@@ -72,6 +72,7 @@ class _IronSourceBannerAdState extends State<IronSourceBannerAd>
 }
 
 abstract class IronSourceBannerListener {
+  const IronSourceBannerListener();
   Future<Null> _handle(MethodCall call) async {
     if (call.method == ON_BANNER_AD_CLICKED)
       onBannerAdClicked();
