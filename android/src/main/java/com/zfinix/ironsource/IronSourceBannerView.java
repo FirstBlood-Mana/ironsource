@@ -63,6 +63,7 @@ public class IronSourceBannerView implements PlatformView, BannerListener, Activ
             public void run() {
                 ISBannerSize size = ISBannerSize.BANNER;
                 rootView = new FrameLayout(context);
+                if(bannerLayout != null)
                 IronSource.destroyBanner(bannerLayout);
                 bannerLayout = IronSource.createBanner(activity, size);
                 bannerLayout.setBannerListener(IronSourceBannerView.this);
