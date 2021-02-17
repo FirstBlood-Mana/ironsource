@@ -31,8 +31,8 @@ public class IronSourceBanner extends PlatformViewFactory {
 
     @Override
     public PlatformView create(Context context, int id, Object args) {
-        Log.d("id", String.valueOf(id));
-        return new IronSourceBannerView(context, id, (HashMap) args, this.messenger, this.mActivity);
+        final Map<String, String> creationParams = (Map<String, String>) args;
+        return new IronSourceBannerView(context, id, creationParams, this.messenger, this.mActivity);
     }
 
 }

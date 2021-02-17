@@ -27,7 +27,7 @@ public class IronSourceBannerView implements PlatformView, BannerListener, Activ
     private FrameLayout rootView;
     private final String TAG = "IronSourceBannerView";
     private final MethodChannel channel;
-    private final HashMap args;
+    private final Map<String, String> args;
     private Context context;
     private Activity activity;
 
@@ -35,19 +35,27 @@ public class IronSourceBannerView implements PlatformView, BannerListener, Activ
 
     private boolean initialized;
 
+    private String placementName = "DefaultBanner";
 
-    IronSourceBannerView(Context context, int id, HashMap args, BinaryMessenger messenger, Activity activity) {
+
+    IronSourceBannerView(Context context, int id, Map<String, String> args, BinaryMessenger messenger, Activity activity) {
         this.channel = new MethodChannel(messenger,
                 IronSourceConsts.BANNER_AD_CHANNEL + id);
         this.activity = activity;
         this.args = args;
         this.context = context;
 
+        if(args.get("placementName") != null && !args.get("placementName").isEmpty()) {
+            this.placementName = args.get("placementName");
+        }
+
         loadBanner();
 
     }
 
     public void loadBanner() {
+
+        placementName = this.placementName;
 
         if (!initialized) {
             initialized = true;
@@ -67,7 +75,7 @@ public class IronSourceBannerView implements PlatformView, BannerListener, Activ
                 IronSource.destroyBanner(bannerLayout);
                 bannerLayout = IronSource.createBanner(activity, size);
                 bannerLayout.setBannerListener(IronSourceBannerView.this);
-                IronSource.loadBanner(bannerLayout);
+                IronSource.loadBanner(bannerLayout, placementName);
 
                 if (rootView.getChildCount() > 0)
                     rootView.removeAllViews();
