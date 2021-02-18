@@ -274,10 +274,12 @@ public class MethodCallHandlerImpl implements MethodCallHandler , InterstitialLi
                 new Runnable() {
                     public void run() {
                         Map<String, Object> arguments = new HashMap<String, Object>();
-                        arguments.put("placementId", placement.getPlacementId());
-                        arguments.put("placementName", placement.getPlacementName());
-                        arguments.put("rewardAmount", placement.getRewardAmount());
-                        arguments.put("rewardName", placement.getRewardName());
+                        if (placement != null) {
+                            arguments.put("placementId", placement.getPlacementId());
+                            arguments.put("placementName", placement.getPlacementName());
+                            arguments.put("rewardAmount", placement.getRewardAmount());
+                            arguments.put("rewardName", placement.getRewardName());
+                        }
                         mChannel.invokeMethod(IronSourceConsts.ON_REWARDED_VIDEO_AD_REWARDED, arguments);
                     }
                 }
@@ -291,8 +293,10 @@ public class MethodCallHandlerImpl implements MethodCallHandler , InterstitialLi
                 new Runnable() {
                     public void run() {
                         Map<String, Object> arguments = new HashMap<String, Object>();
-                        arguments.put("errorCode", ironSourceError.getErrorCode());
-                        arguments.put("errorMessage", ironSourceError.getErrorMessage());
+                        if (ironSourceError != null) {
+                            arguments.put("errorCode", ironSourceError.getErrorCode());
+                            arguments.put("errorMessage", ironSourceError.getErrorMessage());
+                        }
                         mChannel.invokeMethod(IronSourceConsts.ON_REWARDED_VIDEO_AD_SHOW_FAILED, arguments);
                     }
                 }
@@ -306,10 +310,12 @@ public class MethodCallHandlerImpl implements MethodCallHandler , InterstitialLi
                 new Runnable() {
                     public void run() {
                         Map<String, Object> arguments = new HashMap<>();
-                        arguments.put("placementId", placement.getPlacementId());
-                        arguments.put("placementName", placement.getPlacementName());
-                        arguments.put("rewardAmount", placement.getRewardAmount());
-                        arguments.put("rewardName", placement.getRewardName());
+                        if (placement != null) {
+                            arguments.put("placementId", placement.getPlacementId());
+                            arguments.put("placementName", placement.getPlacementName());
+                            arguments.put("rewardAmount", placement.getRewardAmount());
+                            arguments.put("rewardName", placement.getRewardName());
+                        }
                         mChannel.invokeMethod(IronSourceConsts.ON_REWARDED_VIDEO_AD_CLICKED, arguments);
                     }
                 }
