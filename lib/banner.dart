@@ -20,10 +20,12 @@ class IronSourceBannerAd extends StatefulWidget {
   final Key key;
   final IronSourceBannerListener listener;
   final bool keepAlive;
+  final String placementName;
   const IronSourceBannerAd({
     this.key,
     this.listener,
     this.keepAlive = false,
+    this.placementName = 'DefaultBanner',
   }) : super(key: key);
 
   @override
@@ -43,17 +45,17 @@ class _IronSourceBannerAdState extends State<IronSourceBannerAd>
   Widget build(BuildContext context) {
     super.build(context);
     if (defaultTargetPlatform == TargetPlatform.android) {
-      return  Container(
+      final Map<String, String> creationParams = <String, String>{
+        'placementName': widget.placementName,
+      };
+      return Container(
           width: size.width.toDouble(),
           height: size.height.toDouble(),
           child: AndroidView(
             key: UniqueKey(),
             viewType: BANNER_AD_CHANNEL,
             onPlatformViewCreated: _onBannerAdViewCreated,
-            creationParams: <String, dynamic>{
-              "height": size.height,
-              "width": size.width,
-            },
+            creationParams: creationParams,
             creationParamsCodec: StandardMessageCodec(),
           ));
     } else {
